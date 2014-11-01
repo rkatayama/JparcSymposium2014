@@ -1,0 +1,422 @@
+//
+// ********************************************************************
+// * DISCLAIMER                                                       *
+// *                                                                  *
+// * The following disclaimer summarizes all the specific disclaimers *
+// * of contributors to this software. The specific disclaimers,which *
+// * govern, are listed with their locations in:                      *
+// *   http://cern.ch/geant4/license                                  *
+// *                                                                  *
+// * Neither the authors of this software system, nor their employing *
+// * institutes,nor the agencies providing financial support for this *
+// * work  make  any representation or  warranty, express or implied, *
+// * regarding  this  software system or assume any liability for its *
+// * use.                                                             *
+// *                                                                  *
+// * This  code  implementation is the  intellectual property  of the *
+// * GEANT4 collaboration.                                            *
+// * By copying,  distributing  or modifying the Program (or any work *
+// * based  on  the Program)  you indicate  your  acceptance of  this *
+// * statement, and all its terms.                                    *
+// ********************************************************************
+//
+//
+// $Id: UCNEqMagElectricField.cc,v 1.1.1.1 2006/04/26 14:31:54 kuzniak Exp $
+// GEANT4 tag $Name:  $
+//
+//
+//  This is the standard right-hand side for equation of motion.
+//
+//  The only case another is required is when using a moving reference
+//  frame ... or extending the class to include additional Forces,
+//  eg an electric field
+//
+//  10.11.98   V.Grichine
+//
+// -------------------------------------------------------------------
+//
+//  4.9.04  adapted for gravity by peter fierlinger  
+//
+
+#include "UCNEqMagElectricField.hh"
+#include "globals.hh"
+#include "G4ThreeVector.hh"
+#include "TNtuple.h"
+#include "G4Event.hh"
+#include "G4EventManager.hh"
+#include "G4Step.hh"
+#include "G4SteppingManager.hh"
+#include "TFile.h"
+
+#include <fstream>
+#include <stdio.h>
+
+int I=0;
+
+bool txton=true;
+
+bool nonrel=true;
+
+UCNEqMagElectricField::UCNEqMagElectricField( G4ElectroMagneticField *emField ): G4EquationOfMotion( emField )
+{
+	G4cout<<"****************"<<G4endl;
+	if(nonrel){
+	G4cout<<"nonrel"<<G4endl;
+	G4cout<<"nonrel"<<G4endl;
+	G4cout<<"nonrel"<<G4endl;
+	G4cout<<"nonrel"<<G4endl;
+	G4cout<<"nonrel"<<G4endl;
+	G4cout<<"nonrel"<<G4endl;
+	G4cout<<"nonrel"<<G4endl;
+	G4cout<<"nonrel"<<G4endl;
+	G4cout<<"nonrel"<<G4endl;
+	G4cout<<"nonrel"<<G4endl;
+	G4cout<<"nonrel"<<G4endl;
+	G4cout<<"nonrel"<<G4endl;
+	G4cout<<"nonrel"<<G4endl;
+	G4cout<<"nonrel"<<G4endl;
+	G4cout<<"nonrel"<<G4endl;
+	G4cout<<"nonrel"<<G4endl;
+	G4cout<<"nonrel"<<G4endl;
+	G4cout<<"nonrel"<<G4endl;
+	G4cout<<"nonrel"<<G4endl;
+	}
+	G4cout<<"volt="<<1*volt<<G4endl;
+	G4cout<<"volt/cm="<<1*volt/cm<<G4endl;
+	G4cout<<"tesla="<<1*tesla<<G4endl;
+	printf("c_light=%0.12lf\n",c_light);;
+	G4cout<<"electron_chrge="<<electron_charge<<G4endl;
+	G4cout<<"MeV="<<1*MeV<<G4endl;
+	G4cout<<"rad="<<1*rad<<G4endl;
+	G4cout<<"m="<<1*m<<G4endl;
+	G4cout<<"cm="<<1*cm<<G4endl;
+	G4cout<<"eV="<<eV<<G4endl;
+	G4cout<<"****************"<<G4endl;
+
+
+	//Magnetic moment is defineed as (g/2)*e\hbar/(2*m)*\sigma
+
+	//anomaly = -3.82608545/2. - 1.;
+	//anomaly = 3.82608545/2. - 1.;
+	//anomaly = 1.9130427 - 1.; //Untill 20130530
+	anomaly = -1.9130427 - 1.;//Since 20130530
+	//NOTE: anomaly is defined that gfactor -1.0
+	//If gfactor is 2.0, then anomaly is zero.
+	//For neutron, gfactor = -3.826,085,45
+
+	magN = (1.9130427)*5.7883818066e-5*(0.510998/939.565379)*MeV ;
+	//The coefficient of neutron magnetic moment[MeV/T]
+	//magN = Gfactor/2*BohrMagnetron[MeV/T]*(Electron mass/Neutron mass)
+
+	omegac = 2*((9.27400915e-24)/(1.602176487e-19))/(1836.152701)*(1.602176487e-19/1.054571628e-34/2.997924258e8)*(rad/m/tesla);
+	//9.27400915e-24 <- Bohr Magnetron (J/T) [SI]
+
+	omegac2 = omegac;
+
+	//omegac = 105.658387/939.565379 * 2.837374841e-3*(rad/cm/kilogauss);
+	// omegac = 0.105658387*GeV/particleMass * 2.837374841e-3*(rad/cm/kilogauss);
+	// Here, muon mass is selected as criterion.
+	// First term is muon mass which has dimension GeV.
+	// Gyromagnetic ration is defined as Gamma = qg/2m(SI),(q/c)g/2m(CGS).
+	// omega is defined as Gamma*B.
+
+	// Bohr Magnetron[SI]:
+	//    \mu_B[SI]         = e*\hbar/{2*{electron mass}} 
+	//                      = 5.7883*1e-5 [eV/T]
+	// => 2*\mu_B/\hbar/c   = 2*\mu_B/{\hbar*c}
+	// => 2*\mu_\mu/\hbar/c = 2*\mu_B/{\hbar*c}*{electron mass/muon mass}
+	//                      = 2*5.7883*1e-5[eV/T]/{197[MeV*fm]}*{0.51/106}
+	//                      = {2*5.7883*0.51*1e-5}/{197*106} [ev/T/MeV/fm]
+	//                      = 2.827347*1e-9*1e-6*1e+15[1/T/m]
+	//                      = 2.827347[1/T/m]
+	//                      = 2.827347*1e-3[1/kGauss/cm]
+	//
+	//NOTE:\mu_B[CGSemu]     = e/c*\hbar/{2*{electron mass}} 
+	//
+	//NOTE:2*\mu/\hbar/c = 2*e*\hbar/{2*{mass}*\hbar*c}
+	//                   = e/{{mass}c}
+	//                   = omegac [SI]
+	//
+	//NOTE:2*\mu/\hbar/c = 2*e/c*\hbar/{2*{mass}*\hbar*c}
+	//                   = (e/c)/{{mass}c}
+	//                   = omegac [cgs]
+
+	// dS/ds = dS/dt*(1/(c*beta)).
+	// dS/dt(CGS) = (e/mc) S \cross
+	//              [ (g/2-1 +1/\gamma) B
+	//               -(g/2-1)\gamma/(\gamma+1) (\beta \cdot B)\beta
+	//               -(g/2-\gamma/(\gamma+1) \beta \cross E ]
+	//-> dS/ds(CGS) = ((e/c)/mc)/beta* S \cross
+	//              [ (g/2-1 +1/\gamma) B
+	//               -(g/2-1)\gamma/(\gamma+1) (\beta \cdot B)\beta
+	//               -(g/2-\gamma/(\gamma+1) \beta \cross E ]
+	//              = (omegac)/beta* S \cross
+	//              [ (g/2-1 +1/\gamma) B
+	//               -(g/2-1)\gamma/(\gamma+1) (\beta \cdot B)\beta
+	//               -(g/2-\gamma/(\gamma+1) \beta \cross E ]
+	//
+	//NOTE: r[m],e[C],R[cm],q[esu]
+	//
+	// Force = e^2/(4\pi\epsilon*r^2)(MKS)[N]
+	//       = e^2*c^2*\mu/(4\pi\r^2)[N]
+	//       = (e[C]*c[cm/sec])^2*10^4*4\pi*10^-7[N*sec2/C2]
+	//          /( 4\pi*10^4*R^2[cm2] )
+	//       = e^2[abC2/C2]*10^-7/R^2
+	//       = q^2[statC]*100*10^-7/R^2
+	//       = q^2[statC]/R^2*10^-5[N]
+	//       = q^2[statC]/R^2(CGSemu)[dyn]
+	//
+	//-> dS/ds(MKS) = (e[MKS]/mc)/beta* S \cross
+	//              [ (g/2-1 +1/\gamma) B
+	//               -(g/2-1)\gamma/(\gamma+1) (\beta \cdot B)\beta
+	//               -(g/2-\gamma/(\gamma+1) \beta \cross E/c ]
+	//              = (omegac)/beta* S \cross
+	//              [ (g/2-1 +1/\gamma) B
+	//               -(g/2-1)\gamma/(\gamma+1) (\beta \cdot B)\beta
+	//               -(g/2-\gamma/(\gamma+1) \beta \cross E/c ]
+	//
+	//NOTE: -(g/2-\gamma/(\gamma+1) \beta \cross E/c
+	//    = -(g/2-\gamma/(\gamma+1) (v \cross E)/c^2
+	//
+
+}
+
+void  
+UCNEqMagElectricField::SetChargeMomentumMass(G4double particleCharge, // e+ units
+		                            G4double,
+                                            G4double particleMass)
+{
+      fMass = particleMass;
+  fCharge = particleCharge;
+  fCof_val = particleCharge*eplus*c_light;
+}
+
+
+
+void
+UCNEqMagElectricField::EvaluateRhsGivenB(const G4double y[],
+					 const G4double G[],
+					 G4double dydx[] ) const
+{
+
+  
+////////////////////////////////////////////////////////////////////
+//   a neutron in a
+//   gravitational field
+
+
+if (fCharge == 0 && fMass > 0){
+//  G4cout << "UCNEX3graveqrhs::evaluaterhsgivenb " << G4endl;
+  G4double momentum_mag_square = sqr(y[3]) + sqr(y[4]) + sqr(y[5]);
+  G4double inv_momentum_magnitude = 1.0 / sqrt( momentum_mag_square );
+
+  G4double Energy = sqrt(momentum_mag_square + fMass*fMass);
+  G4double cof2 = Energy/c_light;
+  G4double cof1 = inv_momentum_magnitude*fMass;
+  G4double inverse_velocity = Energy*inv_momentum_magnitude/c_light;
+  dydx[0] = y[3]*inv_momentum_magnitude;       //  (d/ds)x = Vx/V
+  dydx[1] = y[4]*inv_momentum_magnitude;       //  (d/ds)y = Vy/V
+  dydx[2] = y[5]*inv_momentum_magnitude;       //  (d/ds)z = Vz/V
+  ///// here changed for a field like gravity in all directions
+  //dydx[3] = -G[0]*cof1*cof2;
+  //dydx[4] = -G[1]*cof1*cof2;
+  //dydx[5] = -G[2]*cof1*cof2;   	//  m*g
+  dydx[3] = 0.;
+  dydx[4] = 0.;
+  dydx[5] = 0.;   	//  no eqm
+  
+  // Lab Time of flight
+  dydx[7] = inverse_velocity;
+
+  dydx[6] = dydx[8] = 0.;//not used
+
+  G4double beta   = sqrt(momentum_mag_square)/Energy ;
+  G4double gamma  = Energy/fMass ;
+  
+  G4ThreeVector BField(G[0],G[1],G[2]);
+  G4ThreeVector EField(G[3],G[4],G[5]);
+
+  G4ThreeVector u(y[3], y[4], y[5]);
+  u *= inv_momentum_magnitude;
+  
+  G4double ucb = (anomaly+1./gamma)/beta;
+  G4double udb = anomaly*beta*gamma/(1.+gamma) * (BField * u);
+  G4double uce = (anomaly + 1./(gamma+1.))/c_light; //MKS
+  //G4double uce = anomaly + 1./(gamma+1.); //CGSesu
+  
+  if(nonrel){
+    //ucb=183./omegac*inverse_velocity;
+    //ucb=1000./omegac*inverse_velocity;
+    udb=0.;
+    uce=0.;
+  }
+  
+  G4ThreeVector Spin(y[9],y[10],y[11]);
+  
+  G4ThreeVector dSpin 
+    //= -1.0*omegac*( +ucb*( Spin.cross(BField) )-udb*( Spin.cross(u) )-uce*( u*(Spin*EField) - EField*(Spin*u)) ); //Untill 20130530
+    = 1.0*omegac*( +ucb*( Spin.cross(BField) )-udb*( Spin.cross(u) )-uce*( u*(Spin*EField) - EField*(Spin*u)) ); //Since 2130530
+  
+  
+  dydx[ 9] = dSpin.x();
+  dydx[10] = dSpin.y();
+  dydx[11] = dSpin.z();
+  //G4cout << dSpin.x() << " " << dSpin.y() << " " << dSpin.z() << G4endl;
+
+
+  G4double Omega = ucb*omegac/inverse_velocity*G[2];
+  G4double Speed = 1./inverse_velocity;
+  
+  if(txton){
+    
+    if(I%200000==0){;}
+    
+    //G4cout << "ys: "<< y[0] << " " << y[1] << " " << y[2] << G4endl;
+    if(fabs(y[1])<1e-3){
+      
+      FILE *fp;
+      
+      if(I==0){
+	
+	fp = fopen("/home/kurata/UCN/test.txt", "w");
+	
+	if (fp==NULL)exit(1);
+	
+	fprintf(fp,"I-Number: EventID: E-Field Strength: magnitude:\nE-field, B-field, BMT eq term 1st, .. 2nd, .. 3rd,  (x,y,z)\n");
+	
+	G4EventManager* EvtManager = G4EventManager::GetEventManager();
+	G4Event* Evt = (G4Event*)EvtManager->GetConstCurrentEvent();
+	
+	/*
+	  fprintf(fp,"%d: %d: %e: %0.15f: %0.15f: %0.15f: %0.15f\n",
+	  I,Evt->GetEventID(),G[5],
+	  ucb*( Spin.cross(BField) ).mag(),
+	  ucb*( Spin.cross(BField) ).getX(),
+	  ucb*( Spin.cross(BField) ).getY(),
+	  ucb*( Spin.cross(BField) ).getZ()
+	  );
+	*/
+	
+	
+	fprintf(fp,"%d: %d: %e\n%0.15f: %0.15f: %0.15f\n%0.15f: %0.15f: %0.15f\n%0.15f: %0.15f: %0.15f: %0.15f\n%0.15f: %0.15f: %0.15f: %0.15f\n%0.15f: %0.15f: %0.15f: %0.15f\n\n",
+		I,Evt->GetEventID(),G[5],
+		G[3],G[4],G[5],G[0],G[1],G[2],
+		omegac*ucb*( Spin.cross(BField) ).mag(),
+		-omegac*ucb*( Spin.cross(BField) ).getX(),
+		-omegac*ucb*( Spin.cross(BField) ).getY(),
+		-omegac*ucb*( Spin.cross(BField) ).getZ(),
+		omegac*udb*( Spin.cross(u).mag() ),
+		omegac*udb*( Spin.cross(u).getX() ),
+		omegac*udb*( Spin.cross(u).getY() ),
+		omegac*udb*( Spin.cross(u).getZ() ),
+		omegac*uce*( Spin.cross(EField.cross(u)).mag()  ),
+		omegac*uce*( Spin.cross(EField.cross(u)).getX()  ),
+		omegac*uce*( Spin.cross(EField.cross(u)).getY()  ),
+		omegac*uce*( Spin.cross(EField.cross(u)).getZ()  )
+		);
+	
+	fclose(fp);
+	
+      }else{
+	
+	fp = fopen("/home/kurata/UCN/test.txt", "a");
+	
+	if (fp==NULL)exit(1);
+	
+	G4EventManager* EvtManager = G4EventManager::GetEventManager();
+	G4Event* Evt = (G4Event*)EvtManager->GetConstCurrentEvent();
+	
+	fprintf(fp,"%d: %d: %e\n%0.15f: %0.15f: %0.15f\n%0.15f: %0.15f: %0.15f\n%0.15f: %0.15f: %0.15f: %0.15f\n%0.15f: %0.15f: %0.15f: %0.15f\n%0.15f: %0.15f: %0.15f: %0.15f\n\n",
+		I,Evt->GetEventID(),G[5],G[3],G[4],G[5],G[0],G[1],G[2],
+		omegac*ucb*( Spin.cross(BField) ).mag(),
+		-omegac*ucb*( Spin.cross(BField) ).getX(),
+		-omegac*ucb*( Spin.cross(BField) ).getY(),
+		-omegac*ucb*( Spin.cross(BField) ).getZ(),
+		//nonrel.mag(),nonrel.getX(),nonrel.getY(),nonrel.getZ(),
+						omegac*udb*( Spin.cross(u).mag() ),
+		omegac*udb*( Spin.cross(u).getX() ),
+		omegac*udb*( Spin.cross(u).getY() ),
+		omegac*udb*( Spin.cross(u).getZ() ),
+		omegac*uce*( Spin.cross(EField.cross(u)).mag()  ),
+		omegac*uce*( Spin.cross(EField.cross(u)).getX()  ),
+		omegac*uce*( Spin.cross(EField.cross(u)).getY()  ),
+						omegac*uce*( Spin.cross(EField.cross(u)).getZ()  )
+		);
+	
+	fclose(fp);
+	
+      }
+    }
+
+    if(I%1000==0){
+      
+      
+      
+      G4cout<<"**************************"<<G4endl;
+      G4cout<<"Omega="<<Omega<<G4endl;
+      G4cout<<"Speed="<<Speed<<G4endl;
+      printf("B=(%0.2e,%0.2e,%0.2e)\n",G[0],G[1],G[2]);
+      printf("E=(%0.2e,%0.2e,%0.2e)\n",G[3],G[4],G[5]);
+      printf("g=(%0.2e,%0.2e,%0.2e)\n",G[6],G[7],G[8]);
+      G4cout<<"dSpin-1st="<<omegac*ucb*(Spin.cross(BField)).mag()<<G4endl;
+      G4cout<<"dSpin-2nd="<<-omegac*udb*( Spin.cross(u).mag() )<<G4endl;
+      G4cout<<"dSpin-3rd="<<-omegac*uce*( u*(Spin*EField) - EField*(Spin*u)).mag() <<G4endl;
+      
+      /*G4cout<<"uce="<<uce<<G4endl;
+	G4cout<<"udb="<<udb<<G4endl;
+	G4cout<<"ucb="<<ucb<<G4endl;
+	G4cout<<"anomaly="<<anomaly<<G4endl;
+	G4cout<<"gamma="<<gamma<<G4endl;
+	G4cout<<"beta="<<beta<<G4endl;
+	G4cout<<"omegac="<<omegac<<G4endl;
+	G4cout<<"gamma="<<gamma<<G4endl;
+	G4cout<<"beta="<<beta<<G4endl;
+	G4cout<<"anomaly + 1./(gamma+1.)="<<anomaly + 1./(gamma+1.)<<G4endl;
+	G4cout<<"G[0]="<<G[0]<<G4endl;
+	G4cout<<"G[1]="<<G[1]<<G4endl;
+	G4cout<<"G[2]="<<G[2]<<G4endl;
+	G4cout<<"G[3]="<<G[3]<<G4endl;
+	G4cout<<"G[4]="<<G[4]<<G4endl;
+	G4cout<<"G[5]="<<G[5]<<G4endl;
+	G4cout<<"|dSpin|="<<dSpin.mag()<<G4endl;
+	G4cout<<"ucb*omegac*v="<<ucb*omegac/inverse_velocity<<G4endl;
+	G4cout<<"omegaB[1/nsec] = "<<ucb*omegac/inverse_velocity*G[2]<<G4endl;
+	printf("omegaB[1/nsec](15keta) = %0.15lf\n",ucb*omegac/inverse_velocity*G[2]);
+	printf("omegaB[1/nsec](16keta) = %0.16lf\n",ucb*omegac/inverse_velocity*G[2]);
+	G4cout<<"omega_rel[1/nsec] = "
+	<< omegac*uce*( u.cross(EField) ).mag()/inverse_velocity <<G4endl;
+	G4cout<<"B_0[T] = "<<BField.mag()<<G4endl;
+	G4cout<<"B_rel[T] = "
+	<< ( u.cross(EField) ).mag()/inverse_velocity/c_light/c_light <<G4endl;
+	G4cout<<"omegac="<<omegac<<G4endl;
+	G4cout<<"y[ 0]="<<y[0]<<G4endl;
+	G4cout<<"y[ 1]="<<y[1]<<G4endl;
+	G4cout<<"y[ 2]="<<y[2]<<G4endl;
+	G4cout<<"y[ 3]="<<y[3]<<G4endl;
+	G4cout<<"y[ 4]="<<y[4]<<G4endl;
+	printf("y[ 4]=%0.15lf\n",y[4]);
+	G4cout<<"y[ 5]="<<y[5]<<G4endl;
+	G4cout<<"y[ 7]="<<y[7]<<G4endl;
+	G4cout<<"y[ 9]="<<y[9]<<G4endl;
+	G4cout<<"y[10]="<<y[10]<<G4endl;
+	G4cout<<"y[11]="<<y[11]<<G4endl;
+	G4cout<<"dydx[ 9]="<<dydx[9]<<G4endl;
+	G4cout<<"dydx[10]="<<dydx[10]<<G4endl;
+	G4cout<<"dydx[11]="<<dydx[11]<<G4endl;
+	G4cout<<"fMass="<<fMass<<G4endl;
+	G4cout<<"fCharge="<<fCharge<<G4endl;
+	G4cout<<"fCof_val="<<fCof_val<<G4endl;
+	G4cout<<"fCharge="<<fCharge<<G4endl;
+	G4cout<<"eplus="<<eplus<<G4endl;*/
+      G4cout<<"**************************"<<G4endl;
+      
+    }
+    
+    I++;
+
+  }
+  return ;
+ }
+ return;
+  
+}

@@ -1,0 +1,4 @@
+Jobs ,nohup ./integral 0.7~2.1 22~45 94, are throwed :Thu Nov  7 18:45:34 2013
+Jobs ,nohup ./integral 0.7~2.1 22~45 94, are throwed :Thu Nov  7 18:53:54 2013
+Jobs ,nohup ./integral 0.7~2.1 22~45 94, are throwed :Wed Nov 13 06:02:39 2013
+Jobs ,nohup ./integral 0.7~2.1 22~45 94, are throwed :Wed Nov 13 06:04:11 2013

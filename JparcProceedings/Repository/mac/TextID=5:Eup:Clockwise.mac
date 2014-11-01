@@ -1,0 +1,62 @@
+# ----------------------------------
+# initial spin orientation (random, +, -)
+/spin/direction -
+# track the spin (0,1)
+/spin/trans 1
+# track the lowfield transitions of the spin (0,1)
+/spin/lowfield 1
+# ----------------------------------
+# set shutter state (open/close) number(1,2,3,..) time (s)
+/shutter/use 0
+#/shutter/use 1
+# ---control shutter number 1
+#/shutter/open 1 0
+#/shutter/close 1 0.999
+#/shutter/open 1 1.999
+#/shutter/loop 1 1
+# ---control shutter number 2
+#/shutter/close 2 0
+#/shutter/open 2 0.999
+#/shutter/close 2 1.999
+#/shutter/loop 2 1
+# ----------------------------------
+/saveToFile/filename hallo123.dat
+# ----------------------------------
+# tell the primarygenerator, if we want to use a spectrum for UCN production
+/gun/usespectrum 0 
+# set a randomseed
+/gun/randomseed 80008498
+# draw a circle at each point, where a ucn is produced 1..on, 0..off
+/gun/visual 1
+#set the filltime of the experiment
+/gun/filltime 0
+# ----------------------------------
+# verbose levels
+/materialboundary/setverbose 0
+/shutter/setverbose 0
+/stopstep/rootname abcdefg.root
+/gun/rotation 1
+/field/Edirection 1
+/materialboundary/setroughness microroughness 5
+#/materialboundary/setroughness lambert
+/field/GravityEffect 1
+/transport/precisetime 1
+/stopstep/stoptime 100
+# ----------------------------------
+# ----------------------------------
+/control/verbose 0
+/tracking/verbose 0
+#/control/saveHistory
+/run/verbose 0
+#
+# visualization
+#/control/execute vis.mac
+# add the trajectories
+#/tracking/storeTrajectory 1
+/tracking/storeTrajectory 0
+/vis/viewer/flush
+#ready
+#/vis/scene/endOfEventAction accumulate
+# start particles
+#/run/beamOn 1
+/run/beamOn 400

@@ -1,0 +1,230 @@
+ //This function illustrates the possible ways to define materials
+ 
+  G4String name, symbol ;             // a=mass of a mole;
+  G4double a, z, density ;            // z=mean number of protons;  
+  G4int nel;
+  G4int ncomponents;
+  G4double fractionmass, pressure, temperature;
+
+  a = 1.01*g/mole;
+  G4Element* elH  = new G4Element(name="Hydrogen", symbol="H", z= 1., a);
+  a = 2.0*g/mole;
+  G4Element* elD  = new G4Element(name="Deuterium", symbol="D", z= 1., a);
+  a = 12.01*g/mole;
+  G4Element* elC = new G4Element(name="Carbon", symbol="C", z=6., a);
+  a = 14.01*g/mole;
+  G4Element* elN  = new G4Element(name="Nitrogen", symbol="N", z= 7., a);
+  a = 16.00*g/mole;
+  G4Element* elO  = new G4Element(name="Oxygen", symbol="O", z= 8., a);
+  a = 18.9984*g/mole;
+  G4Element* elF  = new G4Element(name="Fluor", symbol="F", z= 9., a);
+  a = 28.0855*g/mole;
+  G4Element* elSi  = new G4Element(name="Silicon", symbol="Si", z= 14., a);
+  a = 39.948*g/mole;
+  G4Element* elAr = new G4Element(name="Argon", symbol="Ar", z=18., a);
+  a = 9.01*g/mole;
+  G4Element* elBe = new G4Element(name="Beryllium", symbol="Be", z=4., a);  
+  a = 26.98*g/mole;
+  G4Element* elAl = new G4Element(name="Aluminium", symbol="Al", z=13., a);  
+  a = 51.9961*g/mole;
+  G4Element* elCr = new G4Element(name="Chromium", symbol="Cr", z=24., a);  
+  a = 55.8*g/mole;
+  G4Element* elFe = new G4Element(name="Iron", symbol="Fe", z=26., a);
+  a = 58.7*g/mole;
+  G4Element* elNi = new G4Element(name="Nickel", symbol="Ni", z=28., a);
+  a = 58.*g/mole;
+  G4Element* elNi58 = new G4Element(name="Nickel58", symbol="Ni58", z=28., a);
+  a = 95.94*g/mole;
+  G4Element* elMo = new G4Element(name="Molybdenum", symbol="Mo", z=42., a);
+
+
+
+
+  // Vacuum
+  density = universe_mean_density;    //from PhysicalConstants.h
+  pressure = 3.e-18*pascal;
+  temperature = 2.73*kelvin;
+  G4Material* Vacuum = new G4Material(name="Vacuum", z=1., a=1.01*g/mole, density,
+				    kStateGas,temperature,pressure);
+
+  // solid deuterium  
+  density = 0.2*g/cm3 ;       // STP
+  G4Material* sD2 = new G4Material(name="sD2"  , density, ncomponents=1);
+  sD2->AddElement(elD, 1);
+
+  // Dry air (average composition)
+  density = 1.7836*mg/cm3 ;       // STP
+  G4Material* Argon = new G4Material(name="Argon"  , density, ncomponents=1);
+  Argon->AddElement(elAr, 1);
+
+  density = 1.25053*mg/cm3 ;       // STP
+  G4Material* Nitrogen = new G4Material(name="N2"  , density, ncomponents=1);
+  Nitrogen->AddElement(elN, 2);
+
+  density = 1.4289*mg/cm3 ;       // STP
+  G4Material* Oxygen = new G4Material(name="O2"  , density, ncomponents=1);
+  Oxygen->AddElement(elO, 2);
+
+  density = 1.2928*mg/cm3 ;       // STP
+  temperature = STP_Temperature;
+  pressure = 1.0e-0*STP_Pressure;
+  G4Material* Air = new G4Material(name="Air"  , density, ncomponents=3,
+                                   kStateGas,temperature,pressure);
+  Air->AddMaterial( Nitrogen, fractionmass = 0.7557 ) ;
+  Air->AddMaterial( Oxygen,   fractionmass = 0.2315 ) ;
+  Air->AddMaterial( Argon,    fractionmass = 0.0128 ) ;
+
+  // Beryllium
+  density = 1.848*g/cm3;
+  G4Material* Beryllium = new G4Material(name="Beryllium", density, nel=1);
+  Beryllium->AddElement(elBe,1);
+
+  // Beryllium2
+  density = 1.848*g/cm3;
+  G4Material* Beryllium2 = new G4Material(name="Beryllium2", density, nel=1);
+  Beryllium2->AddElement(elBe,1);
+
+  // Beryllium3
+  //density = 1.848*g/cm3;
+  //G4Material* Beryllium3 = new G4Material(name="Beryllium3", density, nel=1);
+  //Beryllium3->AddElement(elBe,1);
+
+  // Fused Silica
+  //density = 2.2*g/cm3;
+  //G4Material* Silica = new G4Material(name="Silica", density, nel=2);
+  //Silica->AddElement(elO,2);
+  //Silica->AddElement(elSi,1);
+
+  // Aluminium
+  density = 2.7*g/cm3;
+  G4Material* Aluminium = new G4Material(name="Aluminium", density, nel=1);
+  Aluminium->AddElement(elAl,1);
+
+  // Aluminium1
+  //density = 2.7*g/cm3;
+  //G4Material* Aluminium1 = new G4Material(name="Aluminium1", density, nel=1);
+  //Aluminium1->AddElement(elAl,1);
+
+  // Chromium
+  //density = 7.24*g/cm3;
+  //G4Material* Chromium = new G4Material(name="Chromium", density, nel=1);
+  //Chromium->AddElement(elCr,1);
+
+  // Molibden
+  //density = 10280*kg/m3;
+  //G4Material* Molibden = new G4Material(name="Molibden", density, nel=1);
+  //Molibden->AddElement(elMo,1);
+
+  // Iron
+  density = 7.874*g/cm3;
+  G4Material* Iron = new G4Material(name="Iron", density, nel=1);
+  Iron->AddElement(elFe,1);
+
+  // Nickel
+  density = 8.908*g/cm3;
+  G4Material* Nickel = new G4Material(name="Nickel", density, nel=1);
+  Nickel->AddElement(elNi,1);
+
+  // Nickel58
+  density = 8.908*g/cm3;
+  G4Material* Nickel58 = new G4Material(name="Nickel58", density, nel=1);
+  Nickel58->AddElement(elNi58,1);
+
+  // Molibden + Nickel
+  //density = 9.04*g/cm3;
+  //G4Material* MoNi = new G4Material(name="MoNi", density, ncomponents=2);
+  //MoNi->AddMaterial(Nickel58, fractionmass = 0.9);
+  //MoNi->AddMaterial(Molibden, fractionmass = 0.1);
+
+  // Stainless Steel type 316 (http://www.pacificfasteners.com/catalog/page29.htm)
+  //density = 7.99*g/cm3;
+  //G4Material* StainlessSteel316 = new G4Material(name="SSteel316", density, ncomponents=4);
+  //StainlessSteel316->AddMaterial(Molibden, fractionmass = .025);
+  //StainlessSteel316->AddMaterial(Iron, fractionmass = .685);
+  //StainlessSteel316->AddMaterial(Nickel, fractionmass = .12);
+  //StainlessSteel316->AddMaterial(Chromium, fractionmass = .17);
+
+  // Aluminium oxide
+  //density = 3.97*g/cm3;   // http://www.cerac.com/pubs/proddata/al2o3.htm
+  //G4Material* AlOxide = new G4Material(name="Al2O3", density, nel=2);
+  //AlOxide->AddElement(elO,3);
+  //AlOxide->AddElement(elAl,2);    
+  
+  // Silicon nitride
+  //density = 3.22*g/cm3;
+  //G4Material* Si3N4 = new G4Material(name="Si3N4", density, nel=2);
+  //Si3N4->AddElement(elSi,3);
+  //Si3N4->AddElement(elN,4);
+
+  // Glass
+  //density = 2.2*g/cm3;
+  //G4Material* Glass = new G4Material(name="Glass", density, nel=2);
+  //Glass->AddElement(elO,2);
+  //Glass->AddElement(elSi,1);
+
+  // UVFS Glass
+  //density = 2.2*g/cm3;
+  //G4Material* UVFS = new G4Material(name="UVFS Glass", density, nel=2);
+  //UVFS->AddElement(elO,2);
+  //UVFS->AddElement(elSi,1);
+  
+  // Teflon
+  //density = 2.2*g/cm3;
+  //G4Material* Teflon = new G4Material(name="Teflon", density, nel=2);
+  //Teflon->AddElement(elC,1);
+  //Teflon->AddElement(elF,2);
+  
+
+  //  G4cout << *(G4Material::GetMaterialTable()) << G4endl;
+
+  	///////////////////////////////////////////////////////
+  	G4double atomicNumber= 1.;
+	G4double massOfMole= 1.008*g/mole;
+	G4double Density= 1.e-25*g/cm3;
+	G4double Temperature = 2.73*kelvin;
+	G4double Pressure= 3.e-18*pascal;
+	G4Material* vacuum =
+		new G4Material("interGalactic", atomicNumber,
+				massOfMole, Density, kStateGas,Temperature, Pressure);
+	///////////////////////////////////////////////////////
+
+	// the result of the properties can depend on the momentum, we want to
+	// have everything constant here.
+
+  const G4int NUM = 2;
+  G4double PP[NUM] =  {1.0, 1.0};
+
+  /// material properties
+  // i prefer to calculate the potential of each material extra instead of using
+  // scatteringlength, molweight and density, since many parameters for UCN in reality 
+  // are slightly different to the calculated ones...
+
+  // parameters SCATCS and ABSCS taken from:
+  // http://rrdjazz.nist.gov/resources/n-lengths/list.html
+ 
+
+	G4double SH_POT[NUM] =         {258.0,258.0};      // neV
+	G4double SH_SPINFLIP[NUM] =      {0.0,0.0};   // rel. per wall collision
+	G4double SH_ETA[NUM] =          {0.,0.};        // loss coefficient W/V
+	//G4double SH_DIFFUS[NUM] =       {1,1};    // diffuse scattering probability
+	G4double SH_DIFFUS[NUM] =       {0.0,0.0};    // diffuse scattering probability
+	G4double SH_REFLECTIVITY[NUM] =     {1.0,1.0};   // reflectivity, not used parameter
+	G4double SH_ABSCS[NUM] =       {0.00001,0.00001};    // 1/v loss cross section at room temperature for Be
+	G4double SH_LOSSCS[NUM] =       {0., 0.};    // loss cross section at room temperature for Be
+	G4double SH_SCATCS[NUM] =       {0.08, 0.08};    // (incoherent) "elastic" scattering cs
+	G4MaterialPropertiesTable *T2 = new G4MaterialPropertiesTable();
+	T2->AddProperty("REFLECTIVITY", PP, SH_REFLECTIVITY,      NUM);
+	T2->AddProperty("DIFFUSION",    PP, SH_DIFFUS,         NUM);
+	T2->AddProperty("FERMIPOT",     PP, SH_POT,               NUM);
+	T2->AddProperty("SPINFLIP",     PP, SH_SPINFLIP,       NUM);
+	T2->AddProperty("LOSS",         PP, SH_ETA           , NUM);
+	T2->AddProperty("LOSSCS",       PP, SH_LOSSCS           , NUM);
+	T2->AddProperty("ABSCS",        PP, SH_ABSCS            , NUM);
+	T2->AddProperty("SCATCS",       PP, SH_SCATCS           , NUM);
+
+  // --- MATERIAL ASSIGNMENT
+  
+  WorldMaterial    	= Vacuum ;
+
+  Shutter1Material = Beryllium ;  
+	Shutter1Material->SetMaterialPropertiesTable(T2);
