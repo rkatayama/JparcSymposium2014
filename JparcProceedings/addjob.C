@@ -85,7 +85,7 @@ void addjob(int IDSTART=1,int IDEND=1){
 				//////////////////////////
 
 
-				sprintf(name,"nohup ./../../geant4_workdir/bin/Linux-g++/JparcProceedings %s >%s &",name,nohup);
+				sprintf(name,"nohup nice ./../../geant4_workdir/bin/Linux-g++/JparcProceedings %s >%s &",name,nohup);
 				printf("%s\n",name);
 				system(name);
 

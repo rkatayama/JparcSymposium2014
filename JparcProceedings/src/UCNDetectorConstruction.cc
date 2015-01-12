@@ -306,7 +306,8 @@ G4VPhysicalVolume* UCNDetectorConstruction::ConstructCalorimeter()
 
 		G4double cylinderradius = 70.*mm; // mm 
 		G4double cylinderinnerradius = 60.*mm; // mm 
-		G4double cylinderthickness = 120.*mm; //mm
+		//G4double cylinderthickness = 120.*mm; //mm
+		G4double cylinderthickness = 100.*mm; //mm
 
 		// cylinder
 		G4Tubs* solidcylinder = new G4Tubs("cylinder",cylinderinnerradius,cylinderradius,
@@ -314,8 +315,8 @@ G4VPhysicalVolume* UCNDetectorConstruction::ConstructCalorimeter()
 
 		G4LogicalVolume*   logiccylinder = new G4LogicalVolume(solidcylinder, 
 				Shutter1Material,"cylinder");   
-		G4UserLimits * CylinderLimits=new G4UserLimits(1.*mm);//
-		logiccylinder->SetUserLimits(CylinderLimits);//
+		//G4UserLimits * CylinderLimits=new G4UserLimits(1.*mm);//
+		//logiccylinder->SetUserLimits(CylinderLimits);//
 
 
 		G4double phi, x, y, z;
@@ -333,7 +334,8 @@ G4VPhysicalVolume* UCNDetectorConstruction::ConstructCalorimeter()
 		////////////////////////
 		G4double contentradius = 60.*mm; // mm 
 		G4double contentinnerradius = 0.*mm; // mm 
-		G4double contentthickness = 120.*mm; //mm
+		//G4double contentthickness = 120.*mm; //mm
+		G4double contentthickness = 100.*mm; //mm
 
 		G4Tubs* contentcylinder = new G4Tubs("content",contentinnerradius,contentradius,
 				cylinderthickness/2.,0.,twopi); 
@@ -368,13 +370,21 @@ G4VPhysicalVolume* UCNDetectorConstruction::ConstructCalorimeter()
 		G4VPhysicalVolume* physicydisk;
 		G4VPhysicalVolume* physicydisk2;
 		G4RotationMatrix rot; rot.rotateX(0.);
+		/*
 		physicydisk = new G4PVPlacement(
 				G4Transform3D(rot,G4ThreeVector(0.,0.,65.*mm)),
 				"storagedisk", logicdisk, physiWorld, false, 0);
 		physicydisk2 = new G4PVPlacement(
 				G4Transform3D(rot,G4ThreeVector(0.,0.,-65.*mm)),
-				"storagedisk2", logicdisk, physiWorld, false, 0);
+				"storagedisk2", logicdisk, physiWorld, false, 0);		
+		 */
 
+		physicydisk = new G4PVPlacement(
+				G4Transform3D(rot,G4ThreeVector(0.,0.,55.*mm)),
+				"storagedisk", logicdisk, physiWorld, false, 0);
+		physicydisk2 = new G4PVPlacement(
+				G4Transform3D(rot,G4ThreeVector(0.,0.,-55.*mm)),
+				"storagedisk2", logicdisk, physiWorld, false, 0);
 
 
 	}//end if STRAGECELL

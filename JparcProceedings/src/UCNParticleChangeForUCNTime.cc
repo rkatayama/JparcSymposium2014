@@ -168,7 +168,7 @@ G4Step* UCNParticleChangeForUCNTime::UpdateStepForAlongStep(G4Step* pStep)
 	//add by katayama
 
 	///////////////////////////////////////////////////
-	// time variable makes update with logn double precision
+	// time variable makes update with long double precision
 	///////////////////////////////////////////////////
   info = (UCNTimeInformation*)(aTrack->GetUserInformation());  
 	precise = (info!=NULL)?info->GetPrecise():false;

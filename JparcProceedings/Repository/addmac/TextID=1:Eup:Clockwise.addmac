@@ -58,4 +58,4 @@
 #ready
 #/vis/scene/endOfEventAction accumulate
 # start particles
-/run/beamOn 1
+/run/beamOn 0
